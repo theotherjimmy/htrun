@@ -21,6 +21,7 @@ from multiprocessing import freeze_support
 from mbed_host_tests import init_host_test_cli_params
 from mbed_host_tests.host_tests_runner.host_test_default import DefaultTestSelector
 
+import logging
 
 def main():
     """! This function drives command line tool 'mbedhtrun' which is using DefaultTestSelector
@@ -29,7 +30,18 @@ def main():
     """
     freeze_support()
     result = -2
-    test_selector = DefaultTestSelector(init_host_test_cli_params())
+    options = init_host_test_cli_params()
+
+    level = logging.ERROR
+    level_map = {
+        "error": logging.ERROR,
+        "warning": logging.WARNING,
+        "info": logging.INFO,
+        "debug": logging.DEBUG
+    }
+
+    logging.getLogger("HTRUN").setLevel(level_map[options.logging_level])
+    test_selector = DefaultTestSelector(options)
     try:
         result = test_selector.execute()
     except (KeyboardInterrupt, SystemExit):

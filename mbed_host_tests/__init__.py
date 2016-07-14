@@ -287,6 +287,14 @@ def init_host_test_cli_params():
                       action="store_true",
                       help='More verbose mode')
 
+    parser.add_option('--logging-level',
+                      dest='logging_level',
+                      type='choice',
+                      choices=['error', 'warning', 'info', 'debug'],
+                      default='debug',
+                      action='store',
+                      help='Increase logging verbosity')
+
     parser.add_option('', '--version',
                       dest='version',
                       default=False,
