@@ -291,7 +291,7 @@ def init_host_test_cli_params():
                       dest='logging_level',
                       type='choice',
                       choices=['error', 'warning', 'info', 'debug'],
-                      default='debug',
+                      default='error',
                       action='store',
                       help='Increase logging verbosity')
 
