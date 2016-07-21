@@ -19,14 +19,9 @@ Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 
 
 import sys
-import traceback
-from time import time
-from Queue import Empty as QueueEmpty   # Queue here refers to the module, not a class
 
-from mbed_host_tests import BaseHostTest
 from multiprocessing import Process, Queue, Lock
 from mbed_host_tests import print_ht_list
-from mbed_host_tests import get_host_test
 from mbed_host_tests import enum_host_tests
 from mbed_host_tests import host_tests_plugins
 from mbed_host_tests.host_tests_logger import HtrunLogger

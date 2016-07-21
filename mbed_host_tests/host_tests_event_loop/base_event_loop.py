@@ -16,9 +16,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import traceback
+
+from Queue import Empty as QueueEmpty   # Queue here refers to the module, not a class
+
 from time import time
 from abc import ABCMeta, abstractmethod
-from mbed_host_tests.host_tests_logger import HtrunLogger
 
 class BaseEventLoop():
     __metaclass__ = ABCMeta

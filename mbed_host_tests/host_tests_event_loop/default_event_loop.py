@@ -15,11 +15,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import traceback
 
 from time import time
-
 from mbed_host_tests import BaseHostTest
 from mbed_host_tests import get_host_test
+from mbed_host_tests.host_tests_conn_proxy import conn_process
 from mbed_host_tests.host_tests_event_loop import BaseEventLoop
 
 class DefaultEventLoop(BaseEventLoop):
