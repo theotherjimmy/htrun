@@ -31,7 +31,7 @@ from mbed_host_tests import enum_host_tests
 from mbed_host_tests import host_tests_plugins
 from mbed_host_tests.host_tests_logger import HtrunLogger
 from mbed_host_tests.host_tests_conn_proxy import conn_process
-from mbed_host_tests.host_tests_event_loop import DefaultEventLoop
+from mbed_host_tests.host_tests_event_loop import event_loop_factory
 from mbed_host_tests.host_tests_runner.host_test import DefaultTestSelectorBase
 from mbed_host_tests.host_tests_toolbox.host_functional import handle_send_break_cmd
 
@@ -94,7 +94,7 @@ class DefaultTestSelector(DefaultTestSelectorBase):
 
         def start_conn_process():
             # Create device info here as it may change after restart.
-            config = {
+            conn_config = {
                 "digest" : "serial",
                 "port" : self.mbed.port,
                 "baudrate" : self.mbed.serial_baud,
@@ -111,7 +111,7 @@ class DefaultTestSelector(DefaultTestSelectorBase):
             if self.options.global_resource_mgr:
                 grm_module, grm_host, grm_port = self.options.global_resource_mgr.split(':')
 
-                config.update({
+                conn_config.update({
                     "conn_resource" : 'grm',
                     "grm_module" : grm_module,
                     "grm_host" : grm_host,
@@ -119,14 +119,21 @@ class DefaultTestSelector(DefaultTestSelectorBase):
                 })
 
             # DUT-host communication process
-            args = (event_queue, dut_event_queue, config)
+            args = (event_queue, dut_event_queue, conn_config)
             p = Process(target=conn_process, args=args)
             p.deamon = True
             p.start()
             return p
         p = start_conn_process()
-
-        event_loop = DefaultEventLoop('HTST', event_queue, dut_event_queue, p, self)
+        
+        # No configuration options needed for the default event loop
+        event_loop = event_loop_factory(
+            {},
+            'HTST',
+            event_queue,
+            dut_event_queue,
+            p,
+            self)
 
         return event_loop.run_loop()
 

@@ -19,3 +19,5 @@ Author: Conor Keegan <Conor.Keegan@arm.com>
 
 from base_event_loop import BaseEventLoop
 from default_event_loop import DefaultEventLoop
+
+from event_loop import event_loop_factory

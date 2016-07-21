@@ -23,8 +23,8 @@ from mbed_host_tests.host_tests_logger import HtrunLogger
 class BaseEventLoop():
     __metaclass__ = ABCMeta
 
-    def __init__(self, logger_name, event_queue, dut_event_queue, process, test_selector):
-        self.logger = HtrunLogger(logger_name)
+    def __init__(self, logger, event_queue, dut_event_queue, process, test_selector):
+        self.logger = logger
 
         self.event_queue = event_queue
         self.dut_event_queue = dut_event_queue
@@ -34,10 +34,15 @@ class BaseEventLoop():
 
         self.result = None
         self.start_time = None
+
         # Default test case timeout
         self.timeout_duration = 10
 
     def register_callback(self, name, callback):
+        """! Register any callbacks that are needed for processing the events
+        @param name The string name used to reference the callback
+        @param callback The callable to register against the name
+        """
         self.callbacks[name] = callback
 
     def run_loop(self):

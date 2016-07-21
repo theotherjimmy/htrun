@@ -23,9 +23,10 @@ from mbed_host_tests import get_host_test
 from mbed_host_tests.host_tests_event_loop import BaseEventLoop
 
 class DefaultEventLoop(BaseEventLoop):
-    def __init__(self, logger_name, event_queue, dut_event_queue, process, test_selector):
-        super(DefaultEventLoop, self).__init__(logger_name, event_queue, dut_event_queue, process, test_selector)
+    def __init__(self, logger, event_queue, dut_event_queue, process, test_selector):
+        super(DefaultEventLoop, self).__init__(logger, event_queue, dut_event_queue, process, test_selector)
 
+        # Add the needed callbacks
         def callback__notify_prn(key, value, timestamp):
             """! Handles __norify_prn. Prints all lines in separate log line """
             for line in value.splitlines():
