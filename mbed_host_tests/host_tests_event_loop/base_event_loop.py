@@ -27,19 +27,26 @@ class BaseEventLoop():
     __metaclass__ = ABCMeta
 
     def __init__(self, logger, event_queue, dut_event_queue, process, test_selector):
-        self.logger = logger
+        """! Create a Base Event Loop instance containing all the generic sections of an event loop
+        @param logger An instance of type <HtrunLogger>
+        @param event_queue Queue of events to process
+        @param dut_event_queue Queue for sending events
+        @param process The process that is running the connection
+        @param test_selector The TestSelector that is using the event loop
+        @return Object of type <BaseEventLoop>
+        """
 
+        self.logger = logger
         self.event_queue = event_queue
         self.dut_event_queue = dut_event_queue
         self.callbacks = {}
         self.p = process
         self.test_selector = test_selector
 
-        self.result = None
-        self.start_time = None
-
         # Default test case timeout
         self.timeout_duration = 10
+        self.result = None
+        self.start_time = None
 
     def register_callback(self, name, callback):
         """! Register any callbacks that are needed for processing the events
