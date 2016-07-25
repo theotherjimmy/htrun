@@ -19,7 +19,13 @@ limitations under the License.
 from mbed_host_tests.host_tests_logger import HtrunLogger
 from mbed_host_tests.host_tests_event_loop import DefaultEventLoop
 
-def event_loop_factory(config, logger_name, event_queue, dut_event_queue, process, test_selector, event_loop_name="default"):
+def event_loop_factory(config,
+                       logger_name,
+                       event_queue,
+                       dut_event_queue,
+                       process,
+                       test_selector,
+                       event_loop_name="greentea-client"):
     """! Factory producing event loops based on the name and the config
     @param config Global configuration for the event loop
     @param logger Name of logger to be produced
@@ -27,13 +33,13 @@ def event_loop_factory(config, logger_name, event_queue, dut_event_queue, proces
     @param dut_event_queue Queue for sending events
     @param process The process that is running the connection
     @param test_selector The TestSelector that is using the event loop
-    @param event_loop_name Name of the event loop (Default: 'default')
+    @param event_loop_name Name of the event loop (Default: 'greentea-client')
     @return Object of type <BaseEventLoop> or None if type of event loop is unknown (event_loop_name)
     """
 
     logger = HtrunLogger(logger_name)
 
-    if event_loop_name == "default":
+    if event_loop_name == "greentea-client":
         # Produce and return the event loop
         logger.prn_inf("initializing default event loop... ")
         event_loop = DefaultEventLoop(
@@ -44,6 +50,6 @@ def event_loop_factory(config, logger_name, event_queue, dut_event_queue, proces
             test_selector)
         return event_loop
     else:
-        logger.pn_err("unknown event loop!")
+        logger.prn_err("unknown event loop!")
         raise NotImplementedError("EventLoop factory: unknown event loop '%s'!" % event_loop_name)
         return None

@@ -26,13 +26,14 @@ from abc import ABCMeta, abstractmethod
 class BaseEventLoop():
     __metaclass__ = ABCMeta
 
-    def __init__(self, logger, event_queue, dut_event_queue, process, test_selector):
+    def __init__(self, logger, event_queue, dut_event_queue, process, test_selector, timeout_duration=10):
         """! Create a Base Event Loop instance containing all the generic sections of an event loop
         @param logger An instance of type <HtrunLogger>
         @param event_queue Queue of events to process
         @param dut_event_queue Queue for sending events
         @param process The process that is running the connection
         @param test_selector The TestSelector that is using the event loop
+        @param timeout_duration The number of seconds before the loop timesout
         @return Object of type <BaseEventLoop>
         """
 
@@ -44,7 +45,7 @@ class BaseEventLoop():
         self.test_selector = test_selector
 
         # Default test case timeout
-        self.timeout_duration = 10
+        self.timeout_duration = timeout_duration
         self.result = None
         self.start_time = None
 
@@ -77,9 +78,9 @@ class BaseEventLoop():
             self.logger.prn_err("something went wrong in the event loop!")
             self.logger.prn_inf("==== Traceback start ====")
             for line in traceback.format_exc().splitlines():
-                print line
+                self.logger.prn_inf(line)
             self.logger.prn_inf("==== Traceback end ====")
-            self.result = test_selector.RESULT_ERROR
+            self.result = self.test_selector.RESULT_ERROR
 
         time_duration = time() - self.start_time
         self.logger.prn_inf("test suite run finished after %.2f sec..."% time_duration)
