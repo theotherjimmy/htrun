@@ -224,7 +224,7 @@ class DefaultEventLoop(BaseEventLoop):
         else:
             if self.test_supervisor:
                 self.result = self.test_supervisor.result()
-            self.logger.prn_inf("host test result(): %s"% str(result))
+            self.logger.prn_inf("host test result(): %s"% str(self.result))
 
         if not self.callbacks__exit:
             self.logger.prn_wrn("missing __exit event from DUT")
