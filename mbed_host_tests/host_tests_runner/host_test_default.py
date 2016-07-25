@@ -19,18 +19,14 @@ Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 
 
 import sys
-import traceback
-from time import time
-from Queue import Empty as QueueEmpty   # Queue here refers to the module, not a class
 
-from mbed_host_tests import BaseHostTest
 from multiprocessing import Process, Queue, Lock
 from mbed_host_tests import print_ht_list
-from mbed_host_tests import get_host_test
 from mbed_host_tests import enum_host_tests
 from mbed_host_tests import host_tests_plugins
 from mbed_host_tests.host_tests_logger import HtrunLogger
 from mbed_host_tests.host_tests_conn_proxy import conn_process
+from mbed_host_tests.host_tests_event_loop import event_loop_factory
 from mbed_host_tests.host_tests_runner.host_test import DefaultTestSelectorBase
 from mbed_host_tests.host_tests_toolbox.host_functional import handle_send_break_cmd
 
@@ -81,67 +77,19 @@ class DefaultTestSelector(DefaultTestSelectorBase):
 
         DefaultTestSelectorBase.__init__(self, options)
 
-    def is_host_test_obj_compatible(self, obj_instance):
-        """! Check if host test object loaded is actually host test class
-             derived from 'mbed_host_tests.BaseHostTest()'
-             Additionaly if host test class implements custom ctor it should
-             call BaseHostTest().__Init__()
-        @param obj_instance Instance of host test derived class
-        @return True if obj_instance is derived from mbed_host_tests.BaseHostTest()
-                and BaseHostTest.__init__() was called, else return False
-        """
-        result = False
-        if obj_instance:
-            result = True
-            self.logger.prn_inf("host test class: '%s'"% obj_instance.__class__)
-
-            # Check if host test (obj_instance) is derived from mbed_host_tests.BaseHostTest()
-            if not isinstance(obj_instance, BaseHostTest):
-                # In theory we should always get host test objects inheriting from BaseHostTest()
-                # because loader will only load those.
-                self.logger.prn_err("host test must inherit from mbed_host_tests.BaseHostTest() class")
-                result = False
-
-            # Check if BaseHostTest.__init__() was called when custom host test is created
-            if not obj_instance.base_host_test_inited():
-                self.logger.prn_err("custom host test __init__() must call BaseHostTest.__init__(self)")
-                result = False
-
-        return result
-
     def run_test(self):
         """! This function implements key-value protocol state-machine.
             Handling of all events and connector are handled here.
         @return Return self.TestResults.RESULT_* enum
         """
-        result = None
-        timeout_duration = 10       # Default test case timeout
         event_queue = Queue()       # Events from DUT to host
         dut_event_queue = Queue()   # Events from host to DUT {k;v}
-
-        def callback__notify_prn(key, value, timestamp):
-            """! Handles __norify_prn. Prints all lines in separate log line """
-            for line in value.splitlines():
-                self.logger.prn_inf(line)
-
-        callbacks = {
-            "__notify_prn" : callback__notify_prn
-        }
-
-        # if True we will allow host test to consume all events after test is finished
-        callbacks_consume = True
-        # Flag check if __exit event occurred
-        callbacks__exit = False
-        # Handle to dynamically loaded host test object
-        self.test_supervisor = None
-        # Version: greentea-client version from DUT
-        self.client_version = None
 
         self.logger.prn_inf("starting host test process...")
 
         def start_conn_process():
             # Create device info here as it may change after restart.
-            config = {
+            conn_config = {
                 "digest" : "serial",
                 "port" : self.mbed.port,
                 "baudrate" : self.mbed.serial_baud,
@@ -158,7 +106,7 @@ class DefaultTestSelector(DefaultTestSelectorBase):
             if self.options.global_resource_mgr:
                 grm_module, grm_host, grm_port = self.options.global_resource_mgr.split(':')
 
-                config.update({
+                conn_config.update({
                     "conn_resource" : 'grm',
                     "grm_module" : grm_module,
                     "grm_host" : grm_host,
@@ -166,197 +114,23 @@ class DefaultTestSelector(DefaultTestSelectorBase):
                 })
 
             # DUT-host communication process
-            args = (event_queue, dut_event_queue, config)
+            args = (event_queue, dut_event_queue, conn_config)
             p = Process(target=conn_process, args=args)
             p.deamon = True
             p.start()
             return p
         p = start_conn_process()
+        
+        # No configuration options needed for the default event loop
+        event_loop = event_loop_factory(
+            {},
+            'HTST',
+            event_queue,
+            dut_event_queue,
+            p,
+            self)
 
-        start_time = time()
-
-        try:
-            consume_preamble_events = True
-            while (time() - start_time) < timeout_duration:
-                # Handle default events like timeout, host_test_name, ...
-                if not event_queue.empty():
-                    try:
-                        (key, value, timestamp) = event_queue.get(timeout=1)
-                    except QueueEmpty:
-                        continue
-
-                    if consume_preamble_events:
-                        if key == '__timeout':
-                            # Override default timeout for this event queue
-                            start_time = time()
-                            timeout_duration = int(value) # New timeout
-                            self.logger.prn_inf("setting timeout to: %d sec"% int(value))
-                        elif key == '__version':
-                            self.client_version = value
-                            self.logger.prn_inf("DUT greentea-client version: " + self.client_version)
-                        elif key == '__host_test_name':
-                            # Load dynamically requested host test
-                            self.test_supervisor = get_host_test(value)
-
-                            # Check if host test object loaded is actually host test class
-                            # derived from 'mbed_host_tests.BaseHostTest()'
-                            # Additionaly if host test class implements custom ctor it should
-                            # call BaseHostTest().__Init__()
-                            if self.test_supervisor and self.is_host_test_obj_compatible(self.test_supervisor):
-                                # Pass communication queues and setup() host test
-                                self.test_supervisor.setup_communication(event_queue, dut_event_queue)
-                                try:
-                                    # After setup() user should already register all callbacks
-                                    self.test_supervisor.setup()
-                                except (TypeError, ValueError):
-                                    # setup() can throw in normal circumstances TypeError and ValueError
-                                    self.logger.prn_err("host test setup() failed, reason:")
-                                    self.logger.prn_inf("==== Traceback start ====")
-                                    for line in traceback.format_exc().splitlines():
-                                        print line
-                                    self.logger.prn_inf("==== Traceback end ====")
-                                    result = self.RESULT_ERROR
-                                    break
-
-                                self.logger.prn_inf("host test setup() call...")
-                                if self.test_supervisor.get_callbacks():
-                                    callbacks.update(self.test_supervisor.get_callbacks())
-                                    self.logger.prn_inf("CALLBACKs updated")
-                                else:
-                                    self.logger.prn_wrn("no CALLBACKs specified by host test")
-                                self.logger.prn_inf("host test detected: %s"% value)
-                            else:
-                                self.logger.prn_err("host test not detected: %s"% value)
-                                result = self.RESULT_ERROR
-                                break
-
-                            consume_preamble_events = False
-                        elif key == '__sync':
-                            # This is DUT-Host Test handshake event
-                            self.logger.prn_inf("sync KV found, uuid=%s, timestamp=%f"% (str(value), timestamp))
-                        elif key == '__notify_conn_lost':
-                            # This event is sent by conn_process, DUT connection was lost
-                            self.logger.prn_err(value)
-                            self.logger.prn_wrn("stopped to consume events due to %s event"% key)
-                            callbacks_consume = False
-                            result = self.RESULT_IO_SERIAL
-                            break
-                        elif key.startswith('__'):
-                            # Consume other system level events
-                            pass
-                        else:
-                            self.logger.prn_err("orphan event in preamble phase: {{%s;%s}}, timestamp=%f"% (key, str(value), timestamp))
-                    else:
-                        if key == '__notify_complete':
-                            # This event is sent by Host Test, test result is in value
-                            # or if value is None, value will be retrieved from HostTest.result() method
-                            self.logger.prn_inf("%s(%s)"% (key, str(value)))
-                            result = value
-                            break
-                        elif key == '__reset_dut':
-                            # Disconnect to avoid connection lost event
-                            dut_event_queue.put(('__host_test_finished', True, time()))
-                            p.join()
-
-                            if value == DefaultTestSelector.RESET_TYPE_SW_RST:
-                                self.logger.prn_inf("Performing software reset.")
-                                # Just disconnecting and re-connecting comm process will soft reset DUT
-                            elif value == DefaultTestSelector.RESET_TYPE_HW_RST:
-                                self.logger.prn_inf("Performing hard reset.")
-                                # request hardware reset
-                                self.mbed.hw_reset()
-                            else:
-                                self.logger.prn_err("Invalid reset type (%s). Supported types [%s]." %
-                                                    (value, ", ".join([DefaultTestSelector.RESET_TYPE_HW_RST,
-                                                                       DefaultTestSelector.RESET_TYPE_SW_RST])))
-                                self.logger.prn_inf("Software reset will be performed.")
-
-                            # connect to the device
-                            p = start_conn_process()
-                        elif key == '__notify_conn_lost':
-                            # This event is sent by conn_process, DUT connection was lost
-                            self.logger.prn_err(value)
-                            self.logger.prn_wrn("stopped to consume events due to %s event"% key)
-                            callbacks_consume = False
-                            result = self.RESULT_IO_SERIAL
-                            break
-                        elif key == '__exit':
-                            # This event is sent by DUT, test suite exited
-                            self.logger.prn_inf("%s(%s)"% (key, str(value)))
-                            callbacks__exit = True
-                            break
-                        elif key in callbacks:
-                            # Handle callback
-                            callbacks[key](key, value, timestamp)
-                        else:
-                            self.logger.prn_err("orphan event in main phase: {{%s;%s}}, timestamp=%f"% (key, str(value), timestamp))
-        except Exception:
-            self.logger.prn_err("something went wrong in event main loop!")
-            self.logger.prn_inf("==== Traceback start ====")
-            for line in traceback.format_exc().splitlines():
-                print line
-            self.logger.prn_inf("==== Traceback end ====")
-            result = self.RESULT_ERROR
-
-        time_duration = time() - start_time
-        self.logger.prn_inf("test suite run finished after %.2f sec..."% time_duration)
-
-        # Force conn_proxy process to return
-        dut_event_queue.put(('__host_test_finished', True, time()))
-        p.join()
-        self.logger.prn_inf("CONN exited with code: %s"% str(p.exitcode))
-
-        # Callbacks...
-        self.logger.prn_inf("No events in queue" if event_queue.empty() else "Some events in queue")
-
-        # If host test was used we will:
-        # 1. Consume all existing events in queue if consume=True
-        # 2. Check result from host test and call teardown()
-
-        if callbacks_consume:
-            # We are consuming all remaining events if requested
-            while not event_queue.empty():
-                try:
-                    (key, value, timestamp) = event_queue.get(timeout=1)
-                except QueueEmpty:
-                    break
-
-                if key == '__notify_complete':
-                    # This event is sent by Host Test, test result is in value
-                    # or if value is None, value will be retrieved from HostTest.result() method
-                    self.logger.prn_inf("%s(%s)"% (key, str(value)))
-                    result = value
-                elif key.startswith('__'):
-                    # Consume other system level events
-                    pass
-                elif key in callbacks:
-                    callbacks[key](key, value, timestamp)
-                else:
-                    self.logger.prn_wrn(">>> orphan event: {{%s;%s}}, timestamp=%f"% (key, str(value), timestamp))
-            self.logger.prn_inf("stopped consuming events")
-
-        if result is not None:  # We must compare here against None!
-            # Here for example we've received some error code like IOERR_COPY
-            self.logger.prn_inf("host test result() call skipped, received: %s"% str(result))
-        else:
-            if self.test_supervisor:
-                result = self.test_supervisor.result()
-            self.logger.prn_inf("host test result(): %s"% str(result))
-
-        if not callbacks__exit:
-            self.logger.prn_wrn("missing __exit event from DUT")
-
-        #if not callbacks__exit and not result:
-        if not callbacks__exit and result is None:
-            self.logger.prn_err("missing __exit event from DUT and no result from host test, timeout...")
-            result = self.RESULT_TIMEOUT
-
-        self.logger.prn_inf("calling blocking teardown()")
-        if self.test_supervisor:
-            self.test_supervisor.teardown()
-        self.logger.prn_inf("teardown() finished")
-
-        return result
+        return event_loop.run_loop()
 
     def execute(self):
         """! Test runner for host test.
