@@ -23,32 +23,7 @@ from Queue import Empty as QueueEmpty   # Queue here refers to the module, not a
 from mbed_host_tests.host_tests_logger import HtrunLogger
 from conn_primitive_serial import SerialConnectorPrimitive
 from conn_primitive_remote import RemoteConnectorPrimitive
-
-
-class KiViBufferWalker():
-    """! Simple auxiliary class used to walk through a buffer and search for KV tokens """
-    def __init__(self):
-        self.KIVI_REGEX = r"\{\{([\w\d_-]+);([^\}]+)\}\}\n"
-        self.buff = str()
-        self.buff_idx = 0
-        self.re_kv = re.compile(self.KIVI_REGEX)
-
-    def append(self, payload):
-        """! Append stream buffer with payload """
-        self.buff += payload
-
-    def search(self):
-        """! Check if there is a KV value in buffer """
-        return self.re_kv.search(self.buff[self.buff_idx:])
-
-    def get_kv(self):
-        m = self.re_kv.search(self.buff[self.buff_idx:])
-        if m:
-            (key, value) = m.groups()
-            kv_str = m.group(0)
-            self.buff_idx = self.buff.find(kv_str, self.buff_idx) + len(kv_str)
-        return (key, value, time())
-
+from mbed_host_tests.host_tests_parser import parser_factory
 
 def conn_primitive_factory(conn_resource, config, event_queue, logger):
     """! Factory producing connectors based on type and config
@@ -114,7 +89,7 @@ def conn_process(event_queue, dut_event_queue, config):
     # Create connector instance with proper configuration
     connector = conn_primitive_factory(conn_resource, config, event_queue, logger)
     # Create simple buffer we will use for Key-Value protocol data
-    kv_buffer = KiViBufferWalker()
+    buffer = parser_factory({}, logger)
 
     # List of all sent to target UUIDs (if multiple found)
     sync_uuid_list = []
@@ -206,9 +181,9 @@ def conn_process(event_queue, dut_event_queue, config):
                     print_data = print_data_lines[-1]
 
             # Stream data stream KV parsing
-            kv_buffer.append(data)
-            while kv_buffer.search():
-                key, value, timestamp = kv_buffer.get_kv()
+            buffer.append(data)
+            while buffer.search():
+                key, value, timestamp = buffer.get_kv()
 
                 if sync_uuid_discovered:
                     event_queue.put((key, value, timestamp))
