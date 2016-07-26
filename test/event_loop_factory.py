@@ -19,6 +19,7 @@ from mbed_host_tests.host_tests_logger import HtrunLogger
 from mbed_host_tests.host_tests_event_loop import event_loop_factory
 from mbed_host_tests.host_tests_event_loop import BaseEventLoop, DefaultEventLoop
 
+
 class EventLoopFactoryTestCase(unittest.TestCase):
 
     def setUp(self):

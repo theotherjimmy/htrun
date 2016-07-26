@@ -33,4 +33,4 @@ def parser_factory(config, logger, parser_name="kivi-parser"):
         return parser
     else:
         logger.prn_err("unknown parser!")
-        raise NotImplementedError("EventLoop factory: unknown parser '%s'!" % parser_name)
+        raise NotImplementedError("Parser factory: unknown parser '%s'!" % parser_name)

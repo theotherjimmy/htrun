@@ -14,7 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
+Author: Conor Keegan <Conor.Keegan@arm.com>
 """
 
-from conn_proxy import conn_primitive_factory
+from default_conn_process import run_default_conn_process
+from conn_process import conn_process_factory

@@ -19,6 +19,7 @@ limitations under the License.
 import re
 from abc import ABCMeta, abstractmethod
 
+
 class BaseParser():
     __metaclass__ = ABCMeta
 

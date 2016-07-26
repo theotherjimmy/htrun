@@ -18,8 +18,7 @@ limitations under the License.
 
 import traceback
 
-from Queue import Empty as QueueEmpty   # Queue here refers to the module, not a class
-
+from Queue import Empty as QueueEmpty
 from time import time
 from abc import ABCMeta, abstractmethod
 

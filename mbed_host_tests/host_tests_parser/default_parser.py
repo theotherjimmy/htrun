@@ -20,6 +20,8 @@ import re
 from time import time
 from mbed_host_tests.host_tests_parser import BaseParser
 
+
+# Also known as KiVi Parser/Walker
 class DefaultParser(BaseParser):
     def __init__(self):
         # Regex for the KiVi Parser

@@ -18,6 +18,7 @@ from multiprocessing import Queue
 from mock import patch, MagicMock
 from mbed_host_tests.host_tests_event_loop import BaseEventLoop
 
+
 class BaseEventLoopTestCase(unittest.TestCase):
 
     class EventLoopClassMock(BaseEventLoop):
