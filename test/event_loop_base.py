@@ -28,7 +28,6 @@ class BaseEventLoopTestCase(unittest.TestCase):
                 event_queue,
                 MagicMock(),
                 MagicMock(),
-                MagicMock(),
                 timeout_duration=timeout)
 
         def process_event(self, event):

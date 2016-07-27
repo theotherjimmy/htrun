@@ -28,13 +28,10 @@ class EventLoopFactoryTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @patch('logging.getLogger')
-    def test_default(self, mock_logging_getLogger):
-        mock_logging_getLogger.return_value = MagicMock()
-
+    @patch('mbed_host_tests.host_tests_conn_process.conn_process.Process', MagicMock())
+    @patch('logging.getLogger', MagicMock())
+    def test_default(self):
         event_loop = event_loop_factory(
-            MagicMock(),
-            MagicMock(),
             MagicMock(),
             MagicMock(),
             MagicMock(),
@@ -42,13 +39,10 @@ class EventLoopFactoryTestCase(unittest.TestCase):
 
         self.assertTrue(isinstance(event_loop, DefaultEventLoop))
 
-    @patch('logging.getLogger')
-    def test_greentea_client(self, mock_logging_getLogger):
-        mock_logging_getLogger.return_value = MagicMock()
-
+    @patch('mbed_host_tests.host_tests_conn_process.conn_process.Process', MagicMock())
+    @patch('logging.getLogger', MagicMock())
+    def test_greentea_client(self):
         event_loop = event_loop_factory(
-            MagicMock(),
-            MagicMock(),
             MagicMock(),
             MagicMock(),
             MagicMock(),
@@ -57,15 +51,13 @@ class EventLoopFactoryTestCase(unittest.TestCase):
 
         self.assertTrue(isinstance(event_loop, DefaultEventLoop))
 
+    @patch('mbed_host_tests.host_tests_conn_process.conn_process.Process', MagicMock())
     @patch('mbed_host_tests.host_tests_event_loop.DefaultEventLoop.__init__')
-    @patch('logging.getLogger')
-    def test_greentea_client_logger(self, mock_logging_getLogger, mock_default_event_loop_init):
-        mock_logging_getLogger.return_value = MagicMock()
+    @patch('logging.getLogger', MagicMock())
+    def test_greentea_client_logger(self, mock_default_event_loop_init):
         mock_default_event_loop_init.return_value = None
 
         event_loop = event_loop_factory(
-            MagicMock(),
-            MagicMock(),
             MagicMock(),
             MagicMock(),
             MagicMock(),
@@ -76,13 +68,9 @@ class EventLoopFactoryTestCase(unittest.TestCase):
         self.assertIsNotNone(call_args)
         self.assertIsInstance(call_args[0][0], HtrunLogger)
 
-    @patch('logging.getLogger')
-    def test_invalid_event_loop(self, mock_logging_getLogger):
-        mock_logging_getLogger.return_value = MagicMock()
-
+    @patch('logging.getLogger', MagicMock())
+    def test_invalid_event_loop(self):
         self.assertRaises(NotImplementedError, event_loop_factory, 
-            MagicMock(),
-            MagicMock(),
             MagicMock(),
             MagicMock(),
             MagicMock(),
