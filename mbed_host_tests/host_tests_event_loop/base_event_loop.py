@@ -25,12 +25,11 @@ from abc import ABCMeta, abstractmethod
 class BaseEventLoop():
     __metaclass__ = ABCMeta
 
-    def __init__(self, logger, event_queue, dut_event_queue, process, test_selector, timeout_duration=10):
+    def __init__(self, logger, event_queue, dut_event_queue, test_selector, timeout_duration=10):
         """! Create a Base Event Loop instance containing all the generic sections of an event loop
         @param logger An instance of type <HtrunLogger>
         @param event_queue Queue of events to process
         @param dut_event_queue Queue for sending events
-        @param process The process that is running the connection
         @param test_selector The TestSelector that is using the event loop
         @param timeout_duration The number of seconds before the loop timesout
         @return Object of type <BaseEventLoop>
@@ -40,7 +39,6 @@ class BaseEventLoop():
         self.event_queue = event_queue
         self.dut_event_queue = dut_event_queue
         self.callbacks = {}
-        self.p = process
         self.test_selector = test_selector
 
         # Default test case timeout
@@ -92,7 +90,7 @@ class BaseEventLoop():
     def process_event(self, event):
         """! Process an indivdual event passed from the event_queue
         @param event The event taken from the event_queue
-        @return True if the next event should be processed, or False if the 
+        @return True if the next event should be processed, or False if the
                 event loop should stop
         """
         pass

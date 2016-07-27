@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import re
 from time import time
 from mbed_host_tests.host_tests_parser import BaseParser
 
@@ -28,10 +27,10 @@ class DefaultParser(BaseParser):
         super(DefaultParser, self).__init__(r"\{\{([\w\d_-]+);([^\}]+)\}\}\n")
 
     def get_kv(self):
-        """! Return the KV results from the buffer 
+        """! Return the KV results from the buffer
         @return Tuple of type (key, value, timestamp)
         """
-        m = self.re.search(self.buff[self.buff_idx:])
+        m = self.compiled_regex.search(self.buff[self.buff_idx:])
         if m:
             (key, value) = m.groups()
             kv_str = m.group(0)

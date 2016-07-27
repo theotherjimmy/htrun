@@ -24,11 +24,11 @@ from mbed_host_tests.host_tests_parser import parser_factory
 from mbed_host_tests.host_tests_conn_proxy import conn_primitive_factory
 
 def run_default_conn_process(
-    logger_name,
-    options,
-    mbed,
-    event_queue,
-    dut_event_queue):
+        logger_name,
+        options,
+        mbed,
+        event_queue,
+        dut_event_queue):
     """! Function which represents the conn process
     @param logger_name Name of the logger which will be created
     @param options Global options specififed from the command line
@@ -37,7 +37,7 @@ def run_default_conn_process(
     @param dut_event_queue Queue for sending events
     @return Int representing the exit status of the process
     """
-    
+
     # Create device info here as it may change after restart.
     config = {
         "digest" : "serial",
@@ -74,7 +74,7 @@ def run_default_conn_process(
     # Create connector instance with proper configuration
     connector = conn_primitive_factory(conn_resource, config, event_queue, logger)
     # Create simple buffer we will use for Key-Value protocol data
-    buffer = parser_factory({}, logger)
+    parser_buffer = parser_factory({}, logger)
 
     # List of all sent to target UUIDs (if multiple found)
     sync_uuid_list = []
@@ -166,9 +166,9 @@ def run_default_conn_process(
                     print_data = print_data_lines[-1]
 
             # Stream data stream KV parsing
-            buffer.append(data)
-            while buffer.search():
-                key, value, timestamp = buffer.get_kv()
+            parser_buffer.append(data)
+            while parser_buffer.search():
+                key, value, timestamp = parser_buffer.get_kv()
 
                 if sync_uuid_discovered:
                     event_queue.put((key, value, timestamp))

@@ -26,7 +26,6 @@ from mbed_host_tests import enum_host_tests
 from mbed_host_tests import host_tests_plugins
 from mbed_host_tests.host_tests_logger import HtrunLogger
 from mbed_host_tests.host_tests_event_loop import event_loop_factory
-from mbed_host_tests.host_tests_conn_process import conn_process_factory
 from mbed_host_tests.host_tests_runner.host_test import DefaultTestSelectorBase
 from mbed_host_tests.host_tests_toolbox.host_functional import handle_send_break_cmd
 
@@ -87,20 +86,11 @@ class DefaultTestSelector(DefaultTestSelectorBase):
 
         self.logger.prn_inf("starting host test process...")
 
-        p = conn_process_factory(
-            self.logger,
-            self.options,
-            self.mbed,
-            event_queue,
-            dut_event_queue)
-        
         # No configuration options needed for the default event loop
         event_loop = event_loop_factory(
             {},
-            'HTST',
             event_queue,
             dut_event_queue,
-            p,
             self)
 
         return event_loop.run_loop()

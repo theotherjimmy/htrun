@@ -20,10 +20,8 @@ from mbed_host_tests.host_tests_logger import HtrunLogger
 from mbed_host_tests.host_tests_event_loop import DefaultEventLoop
 
 def event_loop_factory(config,
-                       logger_name,
                        event_queue,
                        dut_event_queue,
-                       process,
                        test_selector,
                        event_loop_name="greentea-client"):
     """! Factory producing event loops based on the name and the config
@@ -34,10 +32,10 @@ def event_loop_factory(config,
     @param process The process that is running the connection
     @param test_selector The TestSelector that is using the event loop
     @param event_loop_name Name of the event loop (Default: 'greentea-client')
-    @return Object of type <BaseEventLoop> or None if type of event loop is unknown (event_loop_name)
+    @return Object of type <BaseEventLoop> or None if type of event loop is unknown
     """
 
-    logger = HtrunLogger(logger_name)
+    logger = HtrunLogger('HTST')
 
     if event_loop_name == "greentea-client":
         # Produce and return the event loop
@@ -46,7 +44,6 @@ def event_loop_factory(config,
             logger,
             event_queue,
             dut_event_queue,
-            process,
             test_selector)
         return event_loop
     else:
