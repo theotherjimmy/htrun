@@ -20,10 +20,10 @@ from multiprocessing import Process
 from mbed_host_tests.host_tests_conn_process import run_default_conn_process
 
 def conn_process_factory(logger, options, mbed, event_queue, dut_event_queue, conn_process_name="greentea-client"):
-    
+
     if conn_process_name == "greentea-client":
         logger.prn_inf("initializing greentea-client connection process... ")
-        
+
         # DUT-host communication process
         args = (
             'CONN',
@@ -33,7 +33,7 @@ def conn_process_factory(logger, options, mbed, event_queue, dut_event_queue, co
             dut_event_queue)
 
         p = Process(target=run_default_conn_process, args=args)
-        p.deamon = True
+        p.daemon = True
         p.start()
         return p
     else:

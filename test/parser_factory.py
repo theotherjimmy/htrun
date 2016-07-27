@@ -14,7 +14,7 @@ limitations under the License.
 """
 
 import unittest
-from mock import patch, MagicMock
+from mock import MagicMock
 from mbed_host_tests.host_tests_parser import DefaultParser, parser_factory
 
 
