@@ -29,6 +29,14 @@ def run_default_conn_process(
     mbed,
     event_queue,
     dut_event_queue):
+    """! Function which represents the conn process
+    @param logger_name Name of the logger which will be created
+    @param options Global options specififed from the command line
+    @param mbed Details on the devices and their connections
+    @param event_queue Queue of events to process
+    @param dut_event_queue Queue for sending events
+    @return Int representing the exit status of the process
+    """
     
     # Create device info here as it may change after restart.
     config = {
