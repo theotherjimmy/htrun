@@ -20,13 +20,13 @@ Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 
 import sys
 
-from multiprocessing import Process, Queue, Lock
+from multiprocessing import Queue, Lock
 from mbed_host_tests import print_ht_list
 from mbed_host_tests import enum_host_tests
 from mbed_host_tests import host_tests_plugins
 from mbed_host_tests.host_tests_logger import HtrunLogger
-from mbed_host_tests.host_tests_conn_proxy import conn_process
 from mbed_host_tests.host_tests_event_loop import event_loop_factory
+from mbed_host_tests.host_tests_conn_process import conn_process_factory
 from mbed_host_tests.host_tests_runner.host_test import DefaultTestSelectorBase
 from mbed_host_tests.host_tests_toolbox.host_functional import handle_send_break_cmd
 
@@ -87,39 +87,12 @@ class DefaultTestSelector(DefaultTestSelectorBase):
 
         self.logger.prn_inf("starting host test process...")
 
-        def start_conn_process():
-            # Create device info here as it may change after restart.
-            conn_config = {
-                "digest" : "serial",
-                "port" : self.mbed.port,
-                "baudrate" : self.mbed.serial_baud,
-                "program_cycle_s" : self.options.program_cycle_s,
-                "reset_type" : self.options.forced_reset_type,
-                "target_id" : self.options.target_id,
-                "serial_pooling" : self.options.pooling_timeout,
-                "forced_reset_timeout" : self.options.forced_reset_timeout,
-                "sync_behavior" : self.options.sync_behavior,
-                "platform_name" : self.options.micro,
-                "image_path" : self.mbed.image_path,
-            }
-
-            if self.options.global_resource_mgr:
-                grm_module, grm_host, grm_port = self.options.global_resource_mgr.split(':')
-
-                conn_config.update({
-                    "conn_resource" : 'grm',
-                    "grm_module" : grm_module,
-                    "grm_host" : grm_host,
-                    "grm_port" : grm_port,
-                })
-
-            # DUT-host communication process
-            args = (event_queue, dut_event_queue, conn_config)
-            p = Process(target=conn_process, args=args)
-            p.deamon = True
-            p.start()
-            return p
-        p = start_conn_process()
+        p = conn_process_factory(
+            self.logger,
+            self.options,
+            self.mbed,
+            event_queue,
+            dut_event_queue)
         
         # No configuration options needed for the default event loop
         event_loop = event_loop_factory(

@@ -14,7 +14,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
+Author: Conor Keegan <Conor.Keegan@arm.com>
 """
 
-from conn_proxy import conn_primitive_factory
+from base_parser import BaseParser
+from default_parser import DefaultParser
+
+from parser import parser_factory
