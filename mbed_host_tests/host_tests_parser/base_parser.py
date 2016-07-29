@@ -27,17 +27,17 @@ class BaseParser():
         self.REGEX = regex
         self.buff = str()
         self.buff_idx = 0
-        self.re = re.compile(self.REGEX)
+        self.compiled_regex = re.compile(self.REGEX)
 
     def append(self, payload):
         """! Append stream buffer with payload """
         self.buff += payload
 
     def search(self):
-        """! Check if there is a KV value in buffer 
+        """! Check if there is a KV value in buffer
         @return MatchObject or None
         """
-        return self.re.search(self.buff[self.buff_idx:])
+        return self.compiled_regex.search(self.buff[self.buff_idx:])
 
     @abstractmethod
     def get_kv(self):

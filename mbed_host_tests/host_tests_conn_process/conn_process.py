@@ -17,11 +17,11 @@ limitations under the License.
 """
 
 from multiprocessing import Process
+from mbed_host_tests.host_tests_logger import HtrunLogger
 from mbed_host_tests.host_tests_conn_process import run_default_conn_process
 
-def conn_process_factory(logger, options, mbed, event_queue, dut_event_queue, conn_process_name="greentea-client"):
+def conn_process_factory(options, mbed, event_queue, dut_event_queue, conn_process_name="greentea-client"):
     """! Factory producing conn processes based on the name
-    @param logger Object of type <HtrunLogger>
     @param options Global options specififed from the command line
     @param mbed Details on the devices and their connections
     @param event_queue Queue of events to process
@@ -29,6 +29,8 @@ def conn_process_factory(logger, options, mbed, event_queue, dut_event_queue, co
     @param conn_process_name Name of the conn process (Default: 'greentea-client')
     @return Callable or Error raised if type of conn process is unknown (conn_process_name)
     """
+
+    logger = HtrunLogger('CPFT')
 
     if conn_process_name == "greentea-client":
         logger.prn_inf("initializing greentea-client connection process... ")

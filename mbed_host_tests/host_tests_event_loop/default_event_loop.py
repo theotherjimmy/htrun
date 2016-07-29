@@ -18,13 +18,21 @@ limitations under the License.
 import traceback
 
 from time import time
+from Queue import Empty as QueueEmpty
 from mbed_host_tests import BaseHostTest
 from mbed_host_tests import get_host_test
 from mbed_host_tests.host_tests_event_loop import BaseEventLoop
+from mbed_host_tests.host_tests_conn_process import conn_process_factory
 
 class DefaultEventLoop(BaseEventLoop):
-    def __init__(self, logger, event_queue, dut_event_queue, process, test_selector):
-        super(DefaultEventLoop, self).__init__(logger, event_queue, dut_event_queue, process, test_selector)
+    def __init__(self, logger, event_queue, dut_event_queue, test_selector):
+        super(DefaultEventLoop, self).__init__(logger, event_queue, dut_event_queue, test_selector)
+
+        self.p = conn_process_factory(
+            self.test_selector.options,
+            self.test_selector.mbed,
+            self.event_queue,
+            self.dut_event_queue)
 
         # Add the needed callbacks
         def callback__notify_prn(key, value, timestamp):
@@ -162,7 +170,11 @@ class DefaultEventLoop(BaseEventLoop):
                     self.logger.prn_inf("Software reset will be performed.")
 
                 # connect to the device
-                self.p = start_conn_process()
+                self.p = conn_process_factory(
+                    self.test_selector.options,
+                    self.test_selector.mbed,
+                    self.event_queue,
+                    self.dut_event_queue)
             elif key == '__notify_conn_lost':
                 # This event is sent by conn_process, DUT connection was lost
                 self.logger.prn_err(value)
