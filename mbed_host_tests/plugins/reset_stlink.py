@@ -17,17 +17,22 @@ limitations under the License.
 Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 """
 
-import os
-from .host_test_plugins import HostTestPluginBase
+from .base import HostTestPluginBase
 
 
-class HostTestPluginCopyMethod_ublox(HostTestPluginBase):
+class HostTestPluginResetMethod_Stlink(HostTestPluginBase):
 
     # Plugin interface
-    name = 'HostTestPluginCopyMethod_ublox'
-    type = 'CopyMethod'
-    capabilities = ['ublox']
-    required_parameters = ['image_path']
+    name = 'HostTestPluginResetMethod_Stlink'
+    type = 'ResetMethod'
+    capabilities = ['stlink']
+    required_parameters = []
+    stable = False
+
+    def __init__(self):
+        """ ctor
+        """
+        HostTestPluginBase.__init__(self)
 
     def is_os_supported(self, os_name=None):
         """! In this implementation this plugin only is supporeted under Windows machines
@@ -44,7 +49,8 @@ class HostTestPluginCopyMethod_ublox(HostTestPluginBase):
     def setup(self, *args, **kwargs):
         """! Configure plugin, this function should be called before plugin execute() method is used.
         """
-        self.FLASH_ERASE = 'FlashErase.exe'
+        # Note you need to have eACommander.exe on your system path!
+        self.ST_LINK_CLI = 'ST-LINK_CLI.exe'
         return True
 
     def execute(self, capability, *args, **kwargs):
@@ -60,19 +66,11 @@ class HostTestPluginCopyMethod_ublox(HostTestPluginBase):
         """
         result = False
         if self.check_parameters(capability, *args, **kwargs) is True:
-            image_path = os.path.normpath(kwargs['image_path'])
-            if capability == 'ublox':
+            if capability == 'stlink':
                 # Example:
-                # FLASH_ERASE -c 2 -s 0xD7000 -l 0x20000 -f "binary_file.bin"
-                cmd = [self.FLASH_ERASE,
-                       '-c',
-                       'A',
-                       '-s',
-                       '0xD7000',
-                       '-l',
-                       '0x20000',
-                       '-f', image_path
-                       ]
+                # ST-LINK_CLI.exe -Rst -Run
+                cmd = [self.ST_LINK_CLI,
+                       '-Rst', '-Run']
                 result = self.run_command(cmd)
         return result
 
@@ -80,4 +78,4 @@ class HostTestPluginCopyMethod_ublox(HostTestPluginBase):
 def load_plugin():
     """ Returns plugin available in this module
     """
-    return HostTestPluginCopyMethod_ublox()
+    return HostTestPluginResetMethod_Stlink()

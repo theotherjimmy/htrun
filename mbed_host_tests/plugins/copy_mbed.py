@@ -1,6 +1,6 @@
 """
 mbed SDK
-Copyright (c) 2011-2018 ARM Limited
+Copyright (c) 2011-2015 ARM Limited
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,49 +19,45 @@ Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 
 import os
 from shutil import copy
-from .host_test_plugins import HostTestPluginBase
+from .base import HostTestPluginBase
 
 
-class HostTestPluginCopyMethod_MPS2(HostTestPluginBase):
-    # MPS2 specific flashing / binary setup funcitons
-
-    name = 'HostTestPluginCopyMethod_MPS2'
-    type = 'CopyMethod'
-    stable = True
-    capabilities = ['mps2']
-    required_parameters = ['image_path', 'destination_disk']
+class HostTestPluginCopyMethod_Mbed(HostTestPluginBase):
+    """ Generic flashing method for mbed-enabled devices (by copy)
+    """
 
     def __init__(self):
         """ ctor
         """
         HostTestPluginBase.__init__(self)
 
-    def mps2_copy(self, image_path, destination_disk):
-        """! mps2 copy method for "mbed enabled" devices.
-             This copies the file on the MPS2 keeping the same extension but
-             renaming it "mbed.extension"
-        @param image_path Path to file to be copied
+    def generic_mbed_copy(self, image_path, destination_disk):
+        """! Generic mbed copy method for "mbed enabled" devices.
+
+        @param image_path Path to binary file to be flashed
         @param destination_disk Path to destination (mbed mount point)
 
-        @details this uses shutil copy to copy the file.
+        @details It uses standard python shutil function to copy image_file (target specific binary) to device's disk.
 
         @return Returns True if copy (flashing) was successful
         """
         result = True
-        # Keep the same extension in the test spec and on the MPS2
-        _, extension = os.path.splitext(image_path);
-        destination_path = os.path.join(destination_disk, "mbed" + extension)
+        if not destination_disk.endswith('/') and not destination_disk.endswith('\\'):
+            destination_disk += '/'
         try:
-            copy(image_path, destination_path)
-            # sync command on mac ignores command line arguments.
-            if os.name == 'posix':
-                result = self.run_command('sync -f %s' % destination_path, shell=True)
+            copy(image_path, destination_disk)
         except Exception as e:
-            self.print_plugin_error("shutil.copy('%s', '%s')"% (image_path, destination_path))
+            self.print_plugin_error("shutil.copy('%s', '%s')"% (image_path, destination_disk))
             self.print_plugin_error("Error: %s"% str(e))
             result = False
-
         return result
+
+    # Plugin interface
+    name = 'HostTestPluginCopyMethod_Mbed'
+    type = 'CopyMethod'
+    stable = True
+    capabilities = ['shutil', 'default']
+    required_parameters = ['image_path', 'destination_disk']
 
     def setup(self, *args, **kwargs):
         """ Configure plugin, this function should be called before plugin execute() method is used.
@@ -73,8 +69,6 @@ class HostTestPluginCopyMethod_MPS2(HostTestPluginBase):
         @details Each capability may directly just call some command line program or execute building pythonic function
         @return Returns True if 'capability' operation was successful
         """
-
-
         if not kwargs['image_path']:
             self.print_plugin_error("Error: image path not specified")
             return False
@@ -86,24 +80,24 @@ class HostTestPluginCopyMethod_MPS2(HostTestPluginBase):
         # This optional parameter can be used if TargetID is provided (-t switch)
         target_id = kwargs.get('target_id', None)
         pooling_timeout = kwargs.get('polling_timeout', 60)
-        result = False
 
+        result = False
         if self.check_parameters(capability, *args, **kwargs):
             # Capability 'default' is a dummy capability
             if kwargs['image_path'] and kwargs['destination_disk']:
-                if capability == 'mps2':
+                if capability == 'shutil':
                     image_path = os.path.normpath(kwargs['image_path'])
                     destination_disk = os.path.normpath(kwargs['destination_disk'])
                     # Wait for mount point to be ready
                     # if mount point changed according to target_id use new mount point
                     # available in result (_, destination_disk) of check_mount_point_ready
-                    result, destination_disk = self.check_mount_point_ready(destination_disk, target_id=target_id, timeout=pooling_timeout)  # Blocking
-                    if result:
-                        result = self.mps2_copy(image_path, destination_disk)
+                    mount_res, destination_disk = self.check_mount_point_ready(destination_disk, target_id=self.target_id, timeout=pooling_timeout)  # Blocking
+                    if mount_res:
+                        result = self.generic_mbed_copy(image_path, destination_disk)
         return result
 
 
 def load_plugin():
     """ Returns plugin available in this module
     """
-    return HostTestPluginCopyMethod_MPS2()
+    return HostTestPluginCopyMethod_Mbed()

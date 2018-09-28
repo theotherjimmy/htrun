@@ -17,22 +17,17 @@ limitations under the License.
 Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 """
 
-from .host_test_plugins import HostTestPluginBase
+from .base import HostTestPluginBase
 
 
-class HostTestPluginResetMethod_JN51xx(HostTestPluginBase):
+class HostTestPluginResetMethod_ublox(HostTestPluginBase):
 
     # Plugin interface
-    name = 'HostTestPluginResetMethod_JN51xx'
+    name = 'HostTestPluginResetMethod_ublox'
     type = 'ResetMethod'
-    capabilities = ['jn51xx']
-    required_parameters = ['serial']
+    capabilities = ['ublox']
+    required_parameters = []
     stable = False
-
-    def __init__(self):
-        """ ctor
-        """
-        HostTestPluginBase.__init__(self)
 
     def is_os_supported(self, os_name=None):
         """! In this implementation this plugin only is supporeted under Windows machines
@@ -49,8 +44,8 @@ class HostTestPluginResetMethod_JN51xx(HostTestPluginBase):
     def setup(self, *args, **kwargs):
         """! Configure plugin, this function should be called before plugin execute() method is used.
         """
-        # Note you need to have eACommander.exe on your system path!
-        self.JN51XX_PROGRAMMER = 'JN51xxProgrammer.exe'
+        # Note you need to have jlink.exe on your system path!
+        self.JLINK = 'jlink.exe'
         return True
 
     def execute(self, capability, *args, **kwargs):
@@ -59,33 +54,24 @@ class HostTestPluginResetMethod_JN51xx(HostTestPluginBase):
         @param capability Capability name
         @param args Additional arguments
         @param kwargs Additional arguments
+
         @details Each capability e.g. may directly just call some command line program or execute building pythonic function
+
         @return Capability call return value
         """
-        if not kwargs['serial']:
-            self.print_plugin_error("Error: serial port not set (not opened?)")
-            return False
-
         result = False
-        if self.check_parameters(capability, *args, **kwargs):
-            if kwargs['serial']:
-                if capability == 'jn51xx':
-                    # Example:
-                    # The device should be automatically reset before the programmer disconnects.
-                    # Issuing a command with no file to program or read will put the device into 
-                    # programming mode and then reset it. E.g.
-                    # $ JN51xxProgrammer.exe -s COM5 -V0
-                    # COM5: Detected JN5179 with MAC address 00:15:8D:00:01:24:E0:37
-                    serial_port = kwargs['serial']
-                    cmd = [self.JN51XX_PROGRAMMER,
-                           '-s', serial_port,
-                           '-V0'
-                          ]
-                    result = self.run_command(cmd)
+        if self.check_parameters(capability, *args, **kwargs) is True:
+            if capability == 'ublox':
+                # Example:
+                # JLINK.exe --CommanderScript aCommandFile
+                cmd = [self.JLINK,
+                       '-CommanderScript',
+                       r'reset.jlink']
+                result = self.run_command(cmd)
         return result
 
 
 def load_plugin():
     """ Returns plugin available in this module
     """
-    return HostTestPluginResetMethod_JN51xx()
+    return HostTestPluginResetMethod_ublox()

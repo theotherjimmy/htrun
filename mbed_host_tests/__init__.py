@@ -34,7 +34,7 @@ from os.path import isfile, join, abspath
 import sys
 from optparse import OptionParser
 from optparse import SUPPRESS_HELP
-from mbed_host_tests import host_tests_plugins
+from mbed_host_tests import plugins
 from mbed_host_tests.registry import HostRegistry
 from mbed_host_tests.host_tests import BaseHostTest, event_callback
 
@@ -95,7 +95,7 @@ def get_plugin_caps(methods=None):
         methods = ['CopyMethod', 'ResetMethod']
     result = {}
     for method in methods:
-        result[method] = host_tests_plugins.get_plugin_caps(method)
+        result[method] = plugins.get_plugin_caps(method)
     return result
 
 def print_ht_list(verbose=False):
@@ -211,7 +211,10 @@ def init_host_test_cli_params():
                       help="Path with target's binary image",
                       metavar="IMAGE_PATH")
 
-    copy_methods_str = "Plugin support: " + ', '.join(host_tests_plugins.get_plugin_caps('CopyMethod'))
+    copy_methods_str = (
+        "Plugin support: " +
+        ', '.join(plugins.get_plugin_caps('CopyMethod'))
+    )
 
     parser.add_option("-c", "--copy",
                       dest="copy_method",
@@ -232,7 +235,10 @@ def init_host_test_cli_params():
                       help="Comma seperated list of device tags used when allocating a target to specify required hardware or attributes [--tag-filters tag1,tag2]",
                       metavar="TAG_FILTERS")
 
-    reset_methods_str = "Plugin support: " + ', '.join(host_tests_plugins.get_plugin_caps('ResetMethod'))
+    reset_methods_str = (
+        "Plugin support: " +
+        ', '.join(plugins.get_plugin_caps('ResetMethod'))
+    )
 
     parser.add_option("-r", "--reset",
                       dest="forced_reset_type",

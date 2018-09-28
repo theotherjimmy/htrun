@@ -1,6 +1,6 @@
 """
 mbed SDK
-Copyright (c) 2011-2015 ARM Limited
+Copyright (c) 2016-2016 ARM Limited
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,42 +14,37 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
+Author: Russ Butler <russ.butler@arm.com>
 """
 
-import os
-from .host_test_plugins import HostTestPluginBase
+import re
+import pkg_resources
+from .base import HostTestPluginBase
+from os.path import join, basename
+from pyOCD.board import MbedBoard
 
 
-class HostTestPluginCopyMethod_Stlink(HostTestPluginBase):
+class HostTestPluginResetMethod_pyOCD(HostTestPluginBase):
 
     # Plugin interface
-    name = 'HostTestPluginCopyMethod_Stlink'
-    type = 'CopyMethod'
-    capabilities = ['stlink']
-    required_parameters = ['image_path']
+    name = 'HostTestPluginResetMethod_pyOCD'
+    type = 'ResetMethod'
+    stable = True
+    capabilities = ['pyocd']
+    required_parameters = ['target_id']
 
     def __init__(self):
-        """ ctor
+        """! ctor
+        @details We can check module version by referring to version attribute
+        import pkg_resources
+        print pkg_resources.require("mbed-host-tests")[0].version
+        '2.7'
         """
         HostTestPluginBase.__init__(self)
-
-    def is_os_supported(self, os_name=None):
-        """! In this implementation this plugin only is supporeted under Windows machines
-        """
-        # If no OS name provided use host OS name
-        if not os_name:
-            os_name = self.mbed_os_support()
-
-        # This plugin only works on Windows
-        if os_name and os_name.startswith('Windows'):
-            return True
-        return False
 
     def setup(self, *args, **kwargs):
         """! Configure plugin, this function should be called before plugin execute() method is used.
         """
-        self.ST_LINK_CLI = 'ST-LINK_CLI.exe'
         return True
 
     def execute(self, capability, *args, **kwargs):
@@ -58,26 +53,27 @@ class HostTestPluginCopyMethod_Stlink(HostTestPluginBase):
         @param capability Capability name
         @param args Additional arguments
         @param kwargs Additional arguments
-
         @details Each capability e.g. may directly just call some command line program or execute building pythonic function
-
         @return Capability call return value
         """
+        if not kwargs['target_id']:
+            self.print_plugin_error("Error: target_id not set")
+            return False
+
         result = False
         if self.check_parameters(capability, *args, **kwargs) is True:
-            image_path = os.path.normpath(kwargs['image_path'])
-            if capability == 'stlink':
-                # Example:
-                # ST-LINK_CLI.exe -p "C:\Work\mbed\build\test\DISCO_F429ZI\GCC_ARM\MBED_A1\basic.bin"
-                cmd = [self.ST_LINK_CLI,
-                       '-p', image_path, '0x08000000',
-                       '-V'
-                       ]
-                result = self.run_command(cmd)
+            if kwargs['target_id']:
+                if capability == 'pyocd':
+                    target_id = kwargs['target_id']
+                    with MbedBoard.chooseBoard(board_id=target_id) as board:
+                        board.target.reset()
+                        board.target.resume()
+                        board.uninit(resume=False)
+                        result = True
         return result
 
 
 def load_plugin():
-    """ Returns plugin available in this module
+    """! Returns plugin available in this module
     """
-    return HostTestPluginCopyMethod_Stlink()
+    return HostTestPluginResetMethod_pyOCD()

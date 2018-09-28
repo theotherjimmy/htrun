@@ -17,17 +17,22 @@ limitations under the License.
 Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 """
 
-from .host_test_plugins import HostTestPluginBase
+import os
+from .base import HostTestPluginBase
 
 
-class HostTestPluginResetMethod_ublox(HostTestPluginBase):
+class HostTestPluginCopyMethod_JN51xx(HostTestPluginBase):
 
     # Plugin interface
-    name = 'HostTestPluginResetMethod_ublox'
-    type = 'ResetMethod'
-    capabilities = ['ublox']
-    required_parameters = []
-    stable = False
+    name = 'HostTestPluginCopyMethod_JN51xx'
+    type = 'CopyMethod'
+    capabilities = ['jn51xx']
+    required_parameters = ['image_path', 'serial']
+
+    def __init__(self):
+        """ ctor
+        """
+        HostTestPluginBase.__init__(self)
 
     def is_os_supported(self, os_name=None):
         """! In this implementation this plugin only is supporeted under Windows machines
@@ -44,8 +49,7 @@ class HostTestPluginResetMethod_ublox(HostTestPluginBase):
     def setup(self, *args, **kwargs):
         """! Configure plugin, this function should be called before plugin execute() method is used.
         """
-        # Note you need to have jlink.exe on your system path!
-        self.JLINK = 'jlink.exe'
+        self.JN51XX_PROGRAMMER = 'JN51xxProgrammer.exe'
         return True
 
     def execute(self, capability, *args, **kwargs):
@@ -54,24 +58,35 @@ class HostTestPluginResetMethod_ublox(HostTestPluginBase):
         @param capability Capability name
         @param args Additional arguments
         @param kwargs Additional arguments
-
         @details Each capability e.g. may directly just call some command line program or execute building pythonic function
-
         @return Capability call return value
         """
+        if not kwargs['image_path']:
+            self.print_plugin_error("Error: image path not specified")
+            return False
+
+        if not kwargs['serial']:
+            self.print_plugin_error("Error: serial port not set (not opened?)")
+            return False
+
         result = False
-        if self.check_parameters(capability, *args, **kwargs) is True:
-            if capability == 'ublox':
-                # Example:
-                # JLINK.exe --CommanderScript aCommandFile
-                cmd = [self.JLINK,
-                       '-CommanderScript',
-                       r'reset.jlink']
-                result = self.run_command(cmd)
+        if self.check_parameters(capability, *args, **kwargs):
+            if kwargs['image_path'] and kwargs['serial']:
+                image_path = os.path.normpath(kwargs['image_path'])
+                serial_port = kwargs['serial']
+                if capability == 'jn51xx':
+                    # Example:
+                    # JN51xxProgrammer.exe -s COM15 -f <file> -V0
+                    cmd = [self.JN51XX_PROGRAMMER,
+                           '-s', serial_port,
+                           '-f', image_path,
+                           '-V0'
+                          ]
+                    result = self.run_command(cmd)
         return result
 
 
 def load_plugin():
     """ Returns plugin available in this module
     """
-    return HostTestPluginResetMethod_ublox()
+    return HostTestPluginCopyMethod_JN51xx()

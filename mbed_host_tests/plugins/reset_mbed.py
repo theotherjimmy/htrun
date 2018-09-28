@@ -19,7 +19,7 @@ Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 
 import re
 import pkg_resources
-from .host_test_plugins import HostTestPluginBase
+from .base import HostTestPluginBase
 
 
 class HostTestPluginResetMethod_Mbed(HostTestPluginBase):

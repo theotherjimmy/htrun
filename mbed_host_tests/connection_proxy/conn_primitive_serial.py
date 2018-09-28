@@ -19,8 +19,8 @@ limitations under the License.
 
 import time
 from serial import Serial, SerialException
-from mbed_host_tests import host_tests_plugins
-from mbed_host_tests.host_tests_plugins.host_test_plugins import HostTestPluginBase
+from mbed_host_tests import plugins
+from mbed_host_tests.plugins.base import HostTestPluginBase
 from .conn_primitive import ConnectorPrimitive, ConnectorPrimitiveException
 
 
@@ -84,7 +84,7 @@ class SerialConnectorPrimitive(ConnectorPrimitive):
         disk = self.config.get('disk', None)
 
         self.logger.prn_inf("reset device using '%s' plugin..."% reset_type)
-        result = host_tests_plugins.call_plugin('ResetMethod',
+        result = plugins.call_plugin('ResetMethod',
             reset_type,
             serial=self.serial,
             disk=disk,

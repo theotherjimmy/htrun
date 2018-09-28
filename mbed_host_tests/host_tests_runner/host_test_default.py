@@ -33,7 +33,7 @@ from multiprocessing import Process, Queue, Lock
 from mbed_host_tests import print_ht_list
 from mbed_host_tests import get_host_test
 from mbed_host_tests import enum_host_tests
-from mbed_host_tests import host_tests_plugins
+from mbed_host_tests import plugins
 from mbed_host_tests.host_tests_logger import HtrunLogger
 from mbed_host_tests.connection_proxy import conn_process
 from mbed_host_tests.host_tests_runner.host_test import DefaultTestSelectorBase
@@ -63,7 +63,7 @@ class DefaultTestSelector(DefaultTestSelectorBase):
                 sys.exit(0)
 
             if options.list_plugins:    # --plugins option
-                host_tests_plugins.print_plugin_info()
+                plugins.print_plugin_info()
                 sys.exit(0)
 
             if options.version:         # --version

@@ -24,54 +24,54 @@ This package can be extended with new packages to add more generic functionality
 
 """
 
-from . import host_test_registry
+from . import registry
 
 # This plugins provide 'flashing' and 'reset' methods to host test scripts
-from . import module_copy_shell
-from . import module_copy_mbed
-from . import module_reset_mbed
-from . import module_power_cycle_mbed
-from . import module_copy_pyocd
-from . import module_reset_pyocd
+from . import copy_shell
+from . import copy_mbed
+from . import reset_mbed
+from . import power_cycle_mbed
+from . import copy_pyocd
+from . import reset_pyocd
 
 # Additional, non standard platforms
-from . import module_copy_silabs
-from . import module_reset_silabs
-from . import module_copy_stlink
-from . import module_reset_stlink
-from . import module_copy_ublox
-from . import module_reset_ublox
-from . import module_reset_mps2
-from . import module_copy_mps2
-#import module_copy_jn51xx
-#import module_reset_jn51xx
+from . import copy_silabs
+from . import reset_silabs
+from . import copy_stlink
+from . import reset_stlink
+from . import copy_ublox
+from . import reset_ublox
+from . import reset_mps2
+from . import copy_mps2
+#import copy_jn51xx
+#import reset_jn51xx
 
 
 # Plugin registry instance
-HOST_TEST_PLUGIN_REGISTRY = host_test_registry.HostTestRegistry()
+HOST_TEST_PLUGIN_REGISTRY = registry.HostTestRegistry()
 
 # Static plugin registration
 # Some plugins are commented out if they are not stable or not commonly used
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_copy_mbed.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_copy_shell.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_reset_mbed.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_copy_pyocd.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(copy_mbed.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(copy_shell.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(reset_mbed.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(copy_pyocd.load_plugin())
 
 # Extra platforms support
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_copy_mps2.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_reset_mps2.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_copy_silabs.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_reset_silabs.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_copy_stlink.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_reset_stlink.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_power_cycle_mbed.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_reset_pyocd.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_reset_ublox.load_plugin())
-HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_copy_ublox.load_plugin())
-#HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_copy_jn51xx.load_plugin())
-#HOST_TEST_PLUGIN_REGISTRY.register_plugin(module_reset_jn51xx.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(copy_mps2.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(reset_mps2.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(copy_silabs.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(reset_silabs.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(copy_stlink.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(reset_stlink.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(power_cycle_mbed.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(reset_pyocd.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(reset_ublox.load_plugin())
+HOST_TEST_PLUGIN_REGISTRY.register_plugin(copy_ublox.load_plugin())
+#HOST_TEST_PLUGIN_REGISTRY.register_plugin(copy_jn51xx.load_plugin())
+#HOST_TEST_PLUGIN_REGISTRY.register_plugin(reset_jn51xx.load_plugin())
 
-# TODO: extend plugin loading to files with name module_*.py loaded ad-hoc
+# TODO: extend plugin loading to files with name *.py loaded ad-hoc
 
 ###############################################################################
 # Functional interface for host test plugin registry

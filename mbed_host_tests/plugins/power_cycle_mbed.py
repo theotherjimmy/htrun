@@ -21,7 +21,7 @@ import os
 import json
 import time
 import requests
-from .host_test_plugins import HostTestPluginBase
+from .base import HostTestPluginBase
 
 
 class HostTestPluginPowerCycleResetMethod(HostTestPluginBase):

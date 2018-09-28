@@ -18,7 +18,7 @@ Author: Russ Butler <russ.butler@arm.com>
 """
 
 import os
-from .host_test_plugins import HostTestPluginBase
+from .base import HostTestPluginBase
 from pyOCD.board import MbedBoard
 from intelhex import IntelHex
 import itertools

@@ -17,17 +17,16 @@ limitations under the License.
 Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 """
 
-import os
-from .host_test_plugins import HostTestPluginBase
+from .base import HostTestPluginBase
 
 
-class HostTestPluginCopyMethod_Silabs(HostTestPluginBase):
+class HostTestPluginResetMethod_SiLabs(HostTestPluginBase):
 
     # Plugin interface
-    name = 'HostTestPluginCopyMethod_Silabs'
-    type = 'CopyMethod'
+    name = 'HostTestPluginResetMethod_SiLabs'
+    type = 'ResetMethod'
     capabilities = ['eACommander', 'eACommander-usb']
-    required_parameters = ['image_path', 'destination_disk']
+    required_parameters = ['disk']
     stable = True
 
     def __init__(self):
@@ -38,6 +37,7 @@ class HostTestPluginCopyMethod_Silabs(HostTestPluginBase):
     def setup(self, *args, **kwargs):
         """ Configure plugin, this function should be called before plugin execute() method is used.
         """
+        # Note you need to have eACommander.exe on your system path!
         self.EACOMMANDER_CMD = 'eACommander.exe'
         return True
 
@@ -54,18 +54,21 @@ class HostTestPluginCopyMethod_Silabs(HostTestPluginBase):
         """
         result = False
         if self.check_parameters(capability, *args, **kwargs) is True:
-            image_path = os.path.normpath(kwargs['image_path'])
-            destination_disk = os.path.normpath(kwargs['destination_disk'])
+            disk = kwargs['disk'].rstrip('/\\')
+
             if capability == 'eACommander':
+                # For this copy method 'disk' will be 'serialno' for eACommander command line parameters
+                # Note: Commands are executed in the order they are specified on the command line
                 cmd = [self.EACOMMANDER_CMD,
-                       '--serialno', destination_disk,
-                       '--flash', image_path,
-                       '--resettype', '2', '--reset']
+                       '--serialno', disk,
+                       '--resettype', '2', '--reset',]
                 result = self.run_command(cmd)
             elif capability == 'eACommander-usb':
+                # For this copy method 'disk' will be 'usb address' for eACommander command line parameters
+                # Note: Commands are executed in the order they are specified on the command line
                 cmd = [self.EACOMMANDER_CMD,
-                       '--usb', destination_disk,
-                       '--flash', image_path]
+                       '--usb', disk,
+                       '--resettype', '2', '--reset',]
                 result = self.run_command(cmd)
         return result
 
@@ -73,4 +76,4 @@ class HostTestPluginCopyMethod_Silabs(HostTestPluginBase):
 def load_plugin():
     """ Returns plugin available in this module
     """
-    return HostTestPluginCopyMethod_Silabs()
+    return HostTestPluginResetMethod_SiLabs()

@@ -20,8 +20,7 @@ Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 import sys
 import optparse
 
-### Flashing/Reset API provided by mbed--host-tests (mbedhtrun)
-from . import host_tests_plugins
+from . import plugins
 
 
 def cmd_parser_setup():
@@ -38,7 +37,10 @@ def cmd_parser_setup():
                       help="Target disk (mount point) path. Example: F:, /mnt/MBED",
                       metavar="DISK_PATH")
 
-    copy_methods_str = "Plugin support: " + ', '.join(host_tests_plugins.get_plugin_caps('CopyMethod'))
+    copy_methods_str = (
+        "Plugin support: " +
+        ', '.join(plugins.get_plugin_caps('CopyMethod'))
+    )
 
     parser.add_option("-c", "--copy",
                       dest="copy_method",
@@ -79,17 +81,19 @@ def main():
         print(version)
         sys.exit(0)
     elif opts.list_plugins:    # --plugins option
-        host_tests_plugins.print_plugin_info()
+        plugins.print_plugin_info()
         sys.exit(0)
     else:
         pass
 
     if opts.filename:
         print("mbedflsh: opening file %s..."% opts.filename)
-        result = host_tests_plugins.call_plugin('CopyMethod',
+        result = plugins.call_plugin(
+            'CopyMethod',
             opts.copy_method,
             image_path=opts.filename,
-            destination_disk=opts.disk)
+            destination_disk=opts.disk
+        )
         errorlevel_flag = result == True
 
     return errorlevel_flag

@@ -21,7 +21,7 @@ import sys
 import json
 from time import sleep
 from serial import Serial, SerialException
-from mbed_host_tests import host_tests_plugins, DEFAULT_BAUD_RATE
+from mbed_host_tests import plugins, DEFAULT_BAUD_RATE
 
 
 def flash_dev(disk=None,
@@ -38,7 +38,7 @@ def flash_dev(disk=None,
     if copy_method == 'default':
         copy_method = 'shell'
     result = False
-    result = host_tests_plugins.call_plugin('CopyMethod',
+    result = plugins.call_plugin('CopyMethod',
                                             copy_method,
                                             image_path=image_path,
                                             serial=port,
@@ -70,7 +70,7 @@ def reset_dev(port=None,
     if not serial_port:
         try:
             with Serial(port, baudrate=baudrate, timeout=timeout) as serial_port:
-                result = host_tests_plugins.call_plugin('ResetMethod',
+                result = plugins.call_plugin('ResetMethod',
                                                         reset_type,
                                                         serial=serial_port,
                                                         disk=disk)
@@ -126,7 +126,7 @@ def handle_send_break_cmd(port,
 
     serial_port.flush()
     # Reset using one of the plugins
-    result = host_tests_plugins.call_plugin('ResetMethod', reset_type, serial=serial_port, disk=disk)
+    result = plugins.call_plugin('ResetMethod', reset_type, serial=serial_port, disk=disk)
     if not result:
         print("mbedhtrun: reset plugin failed")
         print(json.dumps({
