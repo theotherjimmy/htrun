@@ -35,7 +35,7 @@ import sys
 from optparse import OptionParser
 from optparse import SUPPRESS_HELP
 from mbed_host_tests import host_tests_plugins
-from mbed_host_tests.host_tests_registry import HostRegistry
+from mbed_host_tests.registry import HostRegistry
 from mbed_host_tests.host_tests import BaseHostTest, event_callback
 
 # Host test supervisors
