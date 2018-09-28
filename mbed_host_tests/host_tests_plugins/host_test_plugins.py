@@ -17,6 +17,8 @@ limitations under the License.
 Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 """
 
+from __future__ import absolute_import
+
 import os
 import sys
 import platform
@@ -26,7 +28,7 @@ from os import access, F_OK
 from sys import stdout
 from time import sleep
 from subprocess import call
-from mbed_host_tests.host_tests_logger import HtrunLogger
+from ..logger import HtrunLogger
 
 
 class HostTestPluginBase:
