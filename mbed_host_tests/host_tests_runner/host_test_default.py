@@ -35,7 +35,7 @@ from mbed_host_tests import get_host_test
 from mbed_host_tests import enum_host_tests
 from mbed_host_tests import host_tests_plugins
 from mbed_host_tests.host_tests_logger import HtrunLogger
-from mbed_host_tests.host_tests_conn_proxy import conn_process
+from mbed_host_tests.connection_proxy import conn_process
 from mbed_host_tests.host_tests_runner.host_test import DefaultTestSelectorBase
 from mbed_host_tests.host_tests_toolbox.host_functional import handle_send_break_cmd
 
