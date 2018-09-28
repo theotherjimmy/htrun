@@ -23,7 +23,7 @@ import mbed_lstools
 from time import sleep
 from mbed_host_tests import DEFAULT_BAUD_RATE
 import mbed_host_tests.plugins as ht_plugins
-from mbed_host_tests.host_tests_logger import HtrunLogger
+from ..logger import HtrunLogger
 
 
 class Mbed:

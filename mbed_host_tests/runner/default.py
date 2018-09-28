@@ -23,20 +23,20 @@ import sys
 import traceback
 from time import time
 from sre_compile import error
+from multiprocessing import Process, Queue, Lock
 if (sys.version_info > (3, 0)):
     from queue import Empty as QueueEmpty # Queue here refers to the module, not a class
 else:
     from Queue import Empty as QueueEmpty
 
 from mbed_host_tests import BaseHostTest
-from multiprocessing import Process, Queue, Lock
 from mbed_host_tests import print_ht_list
 from mbed_host_tests import get_host_test
 from mbed_host_tests import enum_host_tests
 from mbed_host_tests import plugins
-from mbed_host_tests.host_tests_logger import HtrunLogger
-from mbed_host_tests.connection_proxy import conn_process
-from mbed_host_tests.host_tests_runner.host_test import DefaultTestSelectorBase
+from ..logger import HtrunLogger
+from ..connection_proxy import conn_process
+from .base import DefaultTestSelectorBase
 from mbed_host_tests.host_tests_toolbox.host_functional import handle_send_break_cmd
 
 
