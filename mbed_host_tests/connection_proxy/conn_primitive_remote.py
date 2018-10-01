@@ -18,7 +18,7 @@ limitations under the License.
 
 from __future__ import absolute_import, print_function
 
-from .. import DEFAULT_BAUD_RATE
+from ..default_settings import DEFAULT_BAUD_RATE
 from .conn_primitive import ConnectorPrimitive
 
 
