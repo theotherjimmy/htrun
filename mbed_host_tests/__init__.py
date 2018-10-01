@@ -35,6 +35,10 @@ import sys
 from optparse import OptionParser
 from optparse import SUPPRESS_HELP
 from mbed_host_tests import plugins
+from mbed_host_tests import registry
+from mbed_host_tests import logger
+from mbed_host_tests import connection_proxy
+from mbed_host_tests import runner
 from mbed_host_tests.registry import HostRegistry
 from mbed_host_tests.host_tests import BaseHostTest, event_callback
 
@@ -46,6 +50,13 @@ from  mbed_host_tests.host_tests.detect_auto import DetectPlatformTest
 from  mbed_host_tests.host_tests.wait_us_auto import WaitusTest
 from  mbed_host_tests.host_tests.default_auto import DefaultAuto
 from  mbed_host_tests.host_tests.dev_null_auto import DevNullTest
+
+# Legacy import locations
+host_tests_plugins = plugins
+host_tests_registry = registry
+host_tests_logger = logger
+host_tests_conn_proxy = connection_proxy
+host_tests_runner = runner
 
 # Populate registry with supervising objects
 HOSTREGISTRY = HostRegistry()
